@@ -3,7 +3,6 @@ Python script to save the data sent by the client to a csv file on the server si
 """
 import csv
 from threading import RLock
-
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -40,7 +39,11 @@ def add_row():
 
         rlock.release()
 
-        return jsonify({"status": "success"})
+        response = jsonify({"status": "success"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.status_code = 200
+
+        return response
 
     except Exception as e:
         print(e)  # For debugging
