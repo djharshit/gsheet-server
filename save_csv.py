@@ -1,11 +1,16 @@
+#!/usr/bin/env python3
+
 """
 Python script to save the data sent by the client to a csv file on the server side using Flask framework
 """
 import csv
 from threading import RLock
+from datetime import datetime
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={r"*": {"origins": "*"}})
 
 file = open("data.csv", "a", newline="")
 csv_writer = csv.writer(file)
@@ -28,22 +33,18 @@ def add_row():
     """
 
     try:
-        data = request.get_json()
+        data = request.form.to_dict()
 
         print(data)  # For debugging
 
         rlock.acquire()
 
-        csv_writer.writerow([data["fullName"], data["phoneNumber"], data["homeTown"], data["email"], data["branch"]])
+        csv_writer.writerow([datetime.now(), data["fullName"], data["phoneNumber"], data["homeTown"], data["email"], data["branch"], data["teamsInterested"], data["pastExp"], data["whyJoin"]])
         file.flush()
 
         rlock.release()
 
-        response = jsonify({"status": "success"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.status_code = 200
-
-        return response
+        return jsonify({"status": "success"})
 
     except Exception as e:
         print(e)  # For debugging
@@ -53,4 +54,4 @@ def add_row():
 
 if __name__ == "__main__":
     print("Server starting...")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=80, debug=True)
