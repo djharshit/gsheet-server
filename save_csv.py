@@ -7,7 +7,7 @@ import csv
 from threading import RLock
 from datetime import datetime
 from flask import Flask, jsonify, request
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 CORS(app, resources={r"*": {"origins": "*"}})
@@ -18,6 +18,7 @@ rlock = RLock()
 
 
 @app.route("/")
+@cross_origin()
 def home_page():
     """
     Home page of the server
@@ -27,6 +28,7 @@ def home_page():
 
 
 @app.post("/add")
+@cross_origin()
 def add_row():
     """
     Add a row to the csv file on the server side using the data sent by the client
@@ -39,7 +41,19 @@ def add_row():
 
         rlock.acquire()
 
-        csv_writer.writerow([datetime.now(), data["fullName"], data["phoneNumber"], data["homeTown"], data["email"], data["branch"], data["teamsInterested"], data["pastExp"], data["whyJoin"]])
+        csv_writer.writerow(
+            [
+                datetime.now(),
+                data["fullName"],
+                data["phoneNumber"],
+                data["homeTown"],
+                data["email"],
+                data["branch"],
+                data["teamsInterested"],
+                data["pastExp"],
+                data["whyJoin"],
+            ]
+        )
         file.flush()
 
         rlock.release()
